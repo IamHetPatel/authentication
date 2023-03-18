@@ -50,6 +50,31 @@ app.post("/register", async (req, res) => {
   }
 });
 
+app.get("/login", (req, res) => {
+    res.render("login");
+  });
+  
+  app.post("/login", async (req, res) => {
+    try {
+        const email = req.body.email;
+      const pwd = req.body.password;
+
+      const userEmail = await Register.findOne({email});
+
+      if(userEmail.password === pwd){
+        console.log(userEmail);
+        res.status(200).send("Logged in!");
+      }
+      else{
+        res.status(404).send("no such email or password")
+      }
+    } catch (e) {
+      console.log(e)
+      res.status(500).send("error?");
+    }
+  });
+
+
 
 
 app.listen(port, () => {
