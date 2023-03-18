@@ -4,6 +4,7 @@ const port = 3000;
 require("./db/conn");
 const path = require("path");
 const hbs = require("hbs");
+const bcrypt = require("bcrypt");
 
 const staticPath = path.join(__dirname, "../public");
 const templatePath = path.join(__dirname, "../templates/views");
@@ -61,7 +62,8 @@ app.get("/login", (req, res) => {
 
       const userEmail = await Register.findOne({email});
 
-      if(userEmail.password === pwd){
+      const isMatch = await bcrypt.compare(pwd,userEmail.password)
+      if(isMatch){
         console.log(userEmail);
         res.status(200).send("Logged in!");
       }
@@ -76,6 +78,13 @@ app.get("/login", (req, res) => {
 
 
 
+// const securePassword = async(password) =>{
+//     const passwordHash = await bcrypt.hash(password,10);
+//     console.log(passwordHash)
+//     const passwordMatch = await bcrypt.compare("hetp",passwordHash)
+//     console.log(passwordMatch)
+// }
+// securePassword("hetp")
 
 app.listen(port, () => {
   console.log(`server is running at port ${port}`);
