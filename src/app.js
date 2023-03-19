@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require("express");
 const app = express();
 const port = 3000;
@@ -5,6 +6,7 @@ require("./db/conn");
 const path = require("path");
 const hbs = require("hbs");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 const staticPath = path.join(__dirname, "../public");
 const templatePath = path.join(__dirname, "../templates/views");
@@ -39,8 +41,13 @@ app.post("/register", async (req, res) => {
         confirmpassword: req.body.confirmpassword,
         phone: req.body.phone
       });
+
+      //jwt middleware
+      console.log("the success part"+registerEmployee)
+      const token =  await registerEmployee.generateAuthToken();
+      console.log("the token part:"+token);
+ 
       const registered = await registerEmployee.save();
-      console.log(registered);
       res.status(201).render("index");
     } else {
       res.send("passwords dont match");
@@ -63,6 +70,9 @@ app.get("/login", (req, res) => {
       const userEmail = await Register.findOne({email});
 
       const isMatch = await bcrypt.compare(pwd,userEmail.password)
+      const token =  await userEmail.generateAuthToken();
+      console.log("the token part:"+token);
+
       if(isMatch){
         console.log(userEmail);
         res.status(200).send("Logged in!");
@@ -86,6 +96,15 @@ app.get("/login", (req, res) => {
 // }
 // securePassword("hetp")
 
+
+// const createToken = async() =>{
+//   const token = await jwt.sign({_id:"64159e0a0f73ca0e829c3056"},"thjkuikytjrhegwfwrgtyjukilutykurtyjrhegwfgrhtejyrukyturtyjerhegwgerhtyj6r", {
+//     expiresIn: "2 minutes"
+//   })
+//   console.log(token);
+//   const userVer = await jwt.verify(token,"thjuikwfhpergnfsfdljg;bnmv;zvd;")
+//   console.log(userVer);
+// } 
 app.listen(port, () => {
   console.log(`server is running at port ${port}`);
 });
