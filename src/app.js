@@ -6,13 +6,18 @@ require("./db/conn");
 const path = require("path");
 const hbs = require("hbs");
 const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
+const cookie = require("js-cookie")
+const cookieParser = require("cookie-parser");
 
+const auth = require("./middleware/auth")
 const staticPath = path.join(__dirname, "../public");
 const templatePath = path.join(__dirname, "../templates/views");
 const partialsPath = path.join(__dirname, "../templates/partials");
+
+app.use(cookieParser())
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
 app.use(express.static(staticPath));
 app.set("view engine", "hbs");
 app.set("views", templatePath);
@@ -22,6 +27,11 @@ const Register = require("./models/register");
 app.get("/", (req, res) => {
   res.render("index");
 });
+app.get("/secret",auth,(req,res)=>{
+  console.log(`the token cookie is ${req.cookies.jwt}`)
+  res.render("secret");
+})
+
 app.get("/register", (req, res) => {
   res.render("register");
 });
@@ -46,6 +56,16 @@ app.post("/register", async (req, res) => {
       console.log("the success part"+registerEmployee)
       const token =  await registerEmployee.generateAuthToken();
       console.log("the token part:"+token);
+      // The res.cookie() function is used to set the cookie name to value.
+      // The value parameter may be a string or object converted to JSON.
+      // Syntax:
+      // res.cookie(name, value ‚[ options])
+      // res.cookie()
+      res.cookie("jwt",token,{
+        expires: new Date(Date.now()+30000),
+        httpOnly: true
+      });
+      console.log(cookie)
  
       const registered = await registerEmployee.save();
       res.status(201).render("index");
@@ -72,6 +92,12 @@ app.get("/login", (req, res) => {
       const isMatch = await bcrypt.compare(pwd,userEmail.password)
       const token =  await userEmail.generateAuthToken();
       console.log("the token part:"+token);
+
+      res.cookie("jwt",token,{
+        expires: new Date(Date.now()+30000),
+        httpOnly: true
+      });
+      console.log(cookie)
 
       if(isMatch){
         console.log(userEmail);
