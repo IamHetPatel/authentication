@@ -30,6 +30,25 @@ app.get("/", (req, res) => {
 app.get("/secret",auth,(req,res)=>{
   console.log(`the token cookie is ${req.cookies.jwt}`)
   res.render("secret");
+});
+app.get("/logout",auth,async (req,res)=>{
+  try{
+    //logout from one device
+    console.log(req.user)
+    req.user.tokens = req.user.tokens.filter((currElement) =>{
+      return currElement.token !== req.token
+    })
+
+    //logout from all devices
+    // req.user.tokens = [];
+    res.clearCookie("jwt");
+    console.log("logged out successfully")
+    await req.user.save();
+    res.render("login")
+  }
+  catch(e){
+    res.status(500).send(e)
+  }
 })
 
 app.get("/register", (req, res) => {
@@ -49,7 +68,8 @@ app.post("/register", async (req, res) => {
         age: req.body.age,
         password: req.body.password,
         confirmpassword: req.body.confirmpassword,
-        phone: req.body.phone
+        phone: req.body.phone,
+        state: req.body.state
       });
 
       //jwt middleware

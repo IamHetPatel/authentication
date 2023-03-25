@@ -24,6 +24,10 @@ const registrationSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
+    state: {
+        type: String,
+        required: true
+    },
     password: {
         type: String,
         required: true
@@ -32,6 +36,7 @@ const registrationSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    
     tokens:[{
         token:{
             type: String,
@@ -55,7 +60,7 @@ registrationSchema.methods.generateAuthToken = async function(){
 }
 
 
-//middleware
+middleware
 registrationSchema.pre("save", async function(next){
     if(this.isModified("password")){
     this.password = await bcrypt.hash(this.password,10)
